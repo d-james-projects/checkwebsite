@@ -37,7 +37,7 @@ RUN go mod verify
 
 COPY . .
 
-RUN go test .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go test .
 
 # Build the binary
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \

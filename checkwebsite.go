@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+var Version = "development"
+
 // Checker is a func type for controlling which check function is called
 type Checker func(string) (bool, error)
 
@@ -54,6 +56,8 @@ func startChecking(wc Checker, website string, timer time.Duration) bool {
 }
 
 func main() {
+	fmt.Println("Version:\t", Version)
+
 	checkURL := "https://www.sky.com/"
 	timer := time.Duration(300 * time.Second)
 
