@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Version is used to identify the build commit for the docker image
 var Version = "development"
 
 // Checker is a func type for controlling which check function is called
@@ -29,11 +30,11 @@ func checkWebsite(website string) (bool, error) {
 	return isUp, err
 }
 
-func startChecking(wc Checker, website string, timer time.Duration) bool {
+func startChecking(wc Checker, website string, number int, timer time.Duration) bool {
 	tz, _ := time.LoadLocation("Europe/Paris")
 	start := time.Now()
 
-	for i := 0; i < 10; {
+	for i := 0; i < number; {
 		if time.Since(start) > timer {
 			parisTime := time.Now().In(tz)
 			fmt.Println("Check at Paris time:", parisTime)
@@ -59,9 +60,12 @@ func main() {
 	fmt.Println("Version:\t", Version)
 
 	checkURL := "https://www.sky.com/"
-	timer := time.Duration(300 * time.Second)
+	number := 5
+	timer := time.Duration(5 * time.Second)
 
-	if len(os.Args) > 3 {
+	// app cmd line has 3 args if none are supplied the defaults apply (see above)
+	// checkwebsite <url> <times to check/int> <delay between checks/int secs>
+	if len(os.Args) > 4 {
 		fmt.Println("Wrong number of parameters supplied, requires just one website url for the check.")
 		os.Exit(1)
 	}
@@ -71,8 +75,14 @@ func main() {
 	} else if len(os.Args) == 3 {
 		checkURL = os.Args[1]
 		i, _ := strconv.Atoi(os.Args[2])
-		timer = time.Duration(time.Duration(i) * time.Second)
+		number = i
+	} else if len(os.Args) == 4 {
+		checkURL = os.Args[1]
+		i, _ := strconv.Atoi(os.Args[2])
+		number = i
+		t, _ := strconv.Atoi(os.Args[3])
+		timer = time.Duration(time.Duration(t) * time.Second)
 	}
 
-	startChecking(checkWebsite, checkURL, timer)
+	startChecking(checkWebsite, checkURL, number, timer)
 }
