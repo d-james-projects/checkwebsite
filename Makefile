@@ -1,6 +1,8 @@
 VERSION=`git rev-parse HEAD`
 BUILD=`date +%FT%T%z`
 LDFLAGS="-X main.Version=${VERSION} -X main.Build=${BUILD} -w -s"
+TAGS?=v0.0
+REPO?=ddwibble
 
 .PHONY: help
 help: ## - Show help message
@@ -18,7 +20,7 @@ build-no-cache:	## - Build the golang docker image based on scratch with no cach
 	@printf "\033[32m\xE2\x9c\x93 Build the golang docker image based on scratch\n\033[0m"
 	@export DOCKER_CONTENT_TRUST=1 && docker build --no-cache --build-arg flags=$(LDFLAGS) -f Dockerfile -t checkwebsite .
 
-.PHONY: push-to-docker
-push-to-azure:	## - Push docker image to azurecr.io container registry
-	@az acr login --name blank
-	@docker push blank/golang-docker-image:$(VERSION)
+.PHONY: push-image
+push-image:	## - Push docker image to container registry
+	@docker tag checkwebsite:latest $(REPO)/checkwebsite:$(TAGS)
+	@docker push $(REPO)/checkwebsite:$(TAGS)
