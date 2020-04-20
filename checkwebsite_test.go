@@ -52,12 +52,14 @@ func mockCheckWebsite(URL string) (bool, error) {
 }
 
 func TestStartChecking(t *testing.T) {
+	URLs := []string{"websiteworking"}
 	want := true
-	got := startChecking(mockCheckWebsite, "websiteisup", 2, time.Duration(1*time.Second))
+	got := startChecking(mockCheckWebsite, URLs, 2, time.Duration(1*time.Second))
 	if got != want {
 		t.Errorf("got %t, want %t", got, want)
 	}
-	got = startChecking(mockCheckWebsite, "thiswebsiteisdown", 2, time.Duration(1*time.Second))
+	URLs[0] = "thiswebsiteisdown"
+	got = startChecking(mockCheckWebsite, URLs, 2, time.Duration(1*time.Second))
 	if got != want {
 		t.Errorf("got %t, want %t", got, want)
 	}

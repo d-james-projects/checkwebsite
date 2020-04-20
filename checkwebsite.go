@@ -34,29 +34,51 @@ func checkWebsite(website string) (bool, error) {
 	return isUp, err
 }
 
-func startChecking(wc Checker, website string, number int, timer time.Duration) bool {
+type result struct {
+	string
+	bool
+	error
+}
+
+func startChecking(wc Checker, websites []string, number int, timer time.Duration) bool {
 	tz, _ := time.LoadLocation("Europe/Paris")
 	start := time.Now()
+
+	rc := make(chan result)
 
 	for i := 0; i < number; {
 		if time.Since(start) > timer {
 			parisTime := time.Now().In(tz)
 			fmt.Println("Check at Paris time:", parisTime)
-			stat, err := wc(website)
-			if err != nil {
-				fmt.Println("Website :", website, "could not be checked, possible networking issue.")
-			} else {
-				if stat {
-					fmt.Println("Website :", website, "is Up")
+			start = time.Now()
+
+			for _, website := range websites {
+				loopWebsite := website
+				go func(u string) {
+					stat, err := wc(loopWebsite)
+					rc <- result{loopWebsite, stat, err}
+				}(website)
+			}
+
+			for c := 0; c < len(websites); c++ {
+				r := <-rc
+
+				if r.error != nil {
+					fmt.Println("Website :", r.string, "could not be checked, possible networking issue.")
 				} else {
-					fmt.Println("Website :", website, "is Down")
+					if r.bool {
+						fmt.Println("Website :", r.string, "is Up")
+					} else {
+						fmt.Println("Website :", r.string, "is Down")
+					}
 				}
 			}
-			start = time.Now()
 			i++
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
+
+	close(rc)
 	return true
 }
 
@@ -67,12 +89,12 @@ func init() {
 	flag.IntVar(&flagIterations, "iterations", flagIterations, "number of times to run the webcheck")
 	flag.DurationVar(&flagTimeInterval, "t", time.Duration(5*time.Second), "time (i.e. 5s) between each webcheck")
 	flag.DurationVar(&flagTimeInterval, "timeinterval", flagTimeInterval, "time (i.e. 5s) between each webcheck")
-
-	flag.Parse()
 }
 
 func main() {
 	var URLs []string
+
+	flag.Parse()
 
 	if len(flag.Args()) == 0 {
 		URLs = append(URLs, "http://127.0.0.1")
@@ -82,5 +104,5 @@ func main() {
 
 	fmt.Printf("Checking the following URLs: %v\n", URLs)
 
-	startChecking(checkWebsite, "http://127.0.0.1", flagIterations, flagTimeInterval)
+	startChecking(checkWebsite, URLs, flagIterations, flagTimeInterval)
 }
