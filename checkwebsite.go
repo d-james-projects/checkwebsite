@@ -1,15 +1,19 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 )
 
 // Version is used to identify the build commit for the docker image
 var Version = "development"
+
+var (
+	flagIterations   int
+	flagTimeInterval time.Duration
+)
 
 // Checker is a func type for controlling which check function is called
 type Checker func(string) (bool, error)
@@ -56,33 +60,27 @@ func startChecking(wc Checker, website string, number int, timer time.Duration) 
 	return true
 }
 
-func main() {
+func init() {
 	fmt.Println("Version:\t", Version)
 
-	checkURL := "https://www.sky.com/"
-	number := 5
-	timer := time.Duration(5 * time.Second)
+	flag.IntVar(&flagIterations, "i", 5, "number of times to run the webcheck")
+	flag.IntVar(&flagIterations, "iterations", flagIterations, "number of times to run the webcheck")
+	flag.DurationVar(&flagTimeInterval, "t", time.Duration(5*time.Second), "time (i.e. 5s) between each webcheck")
+	flag.DurationVar(&flagTimeInterval, "timeinterval", flagTimeInterval, "time (i.e. 5s) between each webcheck")
 
-	// app cmd line has 3 args if none are supplied the defaults apply (see above)
-	// checkwebsite <url> <times to check/int> <delay between checks/int secs>
-	if len(os.Args) > 4 {
-		fmt.Println("Wrong number of parameters supplied, requires just one website url for the check.")
-		os.Exit(1)
+	flag.Parse()
+}
+
+func main() {
+	var URLs []string
+
+	if len(flag.Args()) == 0 {
+		URLs = append(URLs, "http://127.0.0.1")
+	} else {
+		URLs = flag.Args()
 	}
 
-	if len(os.Args) == 2 {
-		checkURL = os.Args[1]
-	} else if len(os.Args) == 3 {
-		checkURL = os.Args[1]
-		i, _ := strconv.Atoi(os.Args[2])
-		number = i
-	} else if len(os.Args) == 4 {
-		checkURL = os.Args[1]
-		i, _ := strconv.Atoi(os.Args[2])
-		number = i
-		t, _ := strconv.Atoi(os.Args[3])
-		timer = time.Duration(time.Duration(t) * time.Second)
-	}
+	fmt.Printf("Checking the following URLs: %v\n", URLs)
 
-	startChecking(checkWebsite, checkURL, number, timer)
+	startChecking(checkWebsite, "http://127.0.0.1", flagIterations, flagTimeInterval)
 }
