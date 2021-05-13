@@ -62,5 +62,5 @@ COPY --from=builder /go/bin/checkwebsite /go/bin/checkwebsite
 # Use an unprivileged user.
 USER appuser:appuser
 
-# Run the hello binary.
+# Run the binary.
 ENTRYPOINT ["/go/bin/checkwebsite"]

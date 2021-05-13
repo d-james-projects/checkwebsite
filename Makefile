@@ -2,7 +2,7 @@ VERSION=`git rev-parse HEAD`
 BUILD=`date +%FT%T%z`
 LDFLAGS="-X main.Version=${VERSION} -X main.Build=${BUILD} -w -s"
 TAGS?=v0.0
-REPO?=ddwibble
+REPO?=dnjameshome
 
 .PHONY: help
 help: ## - Show help message
@@ -12,15 +12,14 @@ help: ## - Show help message
 .PHONY: build
 build:	## - Build the golang docker image based on scratch
 	@printf "\033[32m\xE2\x9c\x93 Build the golang docker image based on scratch\n\033[0m"
-#	@export DOCKER_CONTENT_TRUST=1 && docker build --build-arg flags="-X main.Version=${VERSION} -X main.Build=${BUILD}" -f Dockerfile -t say-hello .
-	@export DOCKER_CONTENT_TRUST=1 && docker build --build-arg flags=$(LDFLAGS) -f Dockerfile -t checkwebsite .
+	@export DOCKER_CONTENT_TRUST=1 && docker build --build-arg flags=$(LDFLAGS) -f Dockerfile -t redgreenserver .
 
 .PHONY: build-no-cache
 build-no-cache:	## - Build the golang docker image based on scratch with no cache
 	@printf "\033[32m\xE2\x9c\x93 Build the golang docker image based on scratch\n\033[0m"
-	@export DOCKER_CONTENT_TRUST=1 && docker build --no-cache --build-arg flags=$(LDFLAGS) -f Dockerfile -t checkwebsite .
+	@export DOCKER_CONTENT_TRUST=1 && docker build --no-cache --build-arg flags=$(LDFLAGS) -f Dockerfile -t redgreenserver .
 
 .PHONY: push-image
 push-image:	## - Push docker image to container registry
-	@docker tag checkwebsite:latest $(REPO)/checkwebsite:$(TAGS)
-	@docker push $(REPO)/checkwebsite:$(TAGS)
+	@docker tag redgreenserver:latest $(REPO)/redgreenserver:$(TAGS)
+	@docker push $(REPO)/redgreenserver:$(TAGS)

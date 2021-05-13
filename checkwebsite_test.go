@@ -31,36 +31,7 @@ func TestCheckWebsite(t *testing.T) {
 		defer myServer.Close()
 
 		want := true
-		got, err := checkWebsite(myServer.URL)
+		got, err := checkWebsite()
 		assertResponse(t, want, got, err)
 	})
-	t.Run("test server response Service Unavailable", func(t *testing.T) {
-		myServer := makeServer(http.StatusServiceUnavailable, 50*time.Millisecond)
-		defer myServer.Close()
-
-		want := false
-		got, err := checkWebsite(myServer.URL)
-		assertResponse(t, want, got, err)
-	})
-}
-
-func mockCheckWebsite(URL string) (bool, error) {
-	if URL == "thiswebsiteisdown" {
-		return false, nil
-	}
-	return true, nil
-}
-
-func TestStartChecking(t *testing.T) {
-	URLs := []string{"websiteworking"}
-	want := true
-	got := startChecking(mockCheckWebsite, URLs, 2, time.Duration(1*time.Second))
-	if got != want {
-		t.Errorf("got %t, want %t", got, want)
-	}
-	URLs[0] = "thiswebsiteisdown"
-	got = startChecking(mockCheckWebsite, URLs, 2, time.Duration(1*time.Second))
-	if got != want {
-		t.Errorf("got %t, want %t", got, want)
-	}
 }
