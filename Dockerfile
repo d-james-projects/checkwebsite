@@ -7,7 +7,7 @@ FROM quay.io/bitnami/golang:latest as builder
 # Install git + SSL ca certificates.
 # Git is required for fetching the dependencies.
 # Ca-certificates is required to call HTTPS endpoints.
-RUN apt update && apt add --no-cache git ca-certificates tzdata && update-ca-certificates
+RUN apt update && apt install git ca-certificates tzdata && update-ca-certificates
 
 ARG flags="-X main.Version=none -X main.Build=none"
 ENV LDFLAGS=$flags
